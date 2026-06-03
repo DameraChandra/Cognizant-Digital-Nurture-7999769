@@ -1,0 +1,1150 @@
+
+mysql> CREATE DATABASE EventManagement;
+ERROR 1007 (HY000): Can't create database 'eventmanagement'; database exists
+mysql> USE EventManagement;
+Database changed
+mysql> CREATE TABLE Users (
+    ->     user_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     full_name VARCHAR(100) NOT NULL,
+    ->     email VARCHAR(100) UNIQUE NOT NULL,
+    ->     city VARCHAR(100) NOT NULL,
+    ->     registration_date DATE NOT NULL
+    -> );
+ERROR 1050 (42S01): Table 'users' already exists
+mysql> SHOW TABLES;
++---------------------------+
+| Tables_in_eventmanagement |
++---------------------------+
+| events                    |
+| users                     |
++---------------------------+
+2 rows in set (0.077 sec)
+
+mysql> INSERT INTO Users
+    -> (full_name,email,city,registration_date)
+    -> VALUES
+    -> ('Alice Johnson','alice@example.com','New York','2024-12-01'),
+    -> ('Bob Smith','bob@example.com','Los Angeles','2024-12-05'),
+    -> ('Charlie Lee','charlie@example.com','Chicago','2024-12-10'),
+    -> ('Diana King','diana@example.com','New York','2025-01-15'),
+    -> ('Ethan Hunt','ethan@example.com','Los Angeles','2025-02-01');
+Query OK, 5 rows affected (0.059 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM Users;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | New York    | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       5 | Bob Smith     | bob@example.com     | Los Angeles | 2024-12-05        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.013 sec)
+
+mysql> CREATE TABLE Events (
+    ->     event_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     title VARCHAR(200) NOT NULL,
+    ->     description TEXT,
+    ->     city VARCHAR(100) NOT NULL,
+    ->     start_date DATETIME NOT NULL,
+    ->     end_date DATETIME NOT NULL,
+    ->     status ENUM('upcoming','completed','cancelled'),
+    ->     organizer_id INT,
+    ->     FOREIGN KEY (organizer_id) REFERENCES Users(user_id)
+    -> );
+ERROR 1050 (42S01): Table 'events' already exists
+mysql> SHOW TABLES;
++---------------------------+
+| Tables_in_eventmanagement |
++---------------------------+
+| events                    |
+| users                     |
++---------------------------+
+2 rows in set (0.027 sec)
+
+mysql> SELECT * FROM Users;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | New York    | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       5 | Bob Smith     | bob@example.com     | Los Angeles | 2024-12-05        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.010 sec)
+
+mysql> CREATE TABLE Registrations (
+    ->     registration_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     user_id INT,
+    ->     event_id INT,
+    ->     registration_date DATE,
+    ->     FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    ->     FOREIGN KEY (event_id) REFERENCES Events(event_id)
+    -> );
+Query OK, 0 rows affected (0.600 sec)
+
+mysql> CREATE TABLE Feedback (
+    ->     feedback_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     user_id INT,
+    ->     event_id INT,
+    ->     rating INT,
+    ->     comments VARCHAR(255),
+    ->     FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    ->     FOREIGN KEY (event_id) REFERENCES Events(event_id)
+    -> );
+Query OK, 0 rows affected (0.638 sec)
+
+mysql> CREATE TABLE Sessions (
+    ->     session_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     event_id INT,
+    ->     session_name VARCHAR(100),
+    ->     speaker VARCHAR(100),
+    ->     start_time DATETIME,
+    ->     end_time DATETIME,
+    ->     FOREIGN KEY (event_id) REFERENCES Events(event_id)
+    -> );
+Query OK, 0 rows affected (0.261 sec)
+
+mysql> CREATE TABLE Resources (
+    ->     resource_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     event_id INT,
+    ->     resource_type VARCHAR(50),
+    ->     resource_link VARCHAR(255),
+    ->     upload_date DATETIME,
+    ->     FOREIGN KEY (event_id) REFERENCES Events(event_id)
+    -> );
+Query OK, 0 rows affected (0.589 sec)
+
+mysql> SHOW TABLES;
++---------------------------+
+| Tables_in_eventmanagement |
++---------------------------+
+| events                    |
+| feedback                  |
+| registrations             |
+| resources                 |
+| sessions                  |
+| users                     |
++---------------------------+
+6 rows in set (0.028 sec)
+
+mysql> INSERT INTO Events
+    -> (title,city,start_date,end_date,status)
+    -> VALUES
+    -> ('Music Festival','New York','2025-08-01','2025-08-02','upcoming'),
+    -> ('Food Carnival','Chicago','2025-09-10','2025-09-11','upcoming'),
+    -> ('Book Fair','Los Angeles','2025-10-15','2025-10-16','upcoming');
+ERROR 1054 (42S22): Unknown column 'end_date' in 'field list'
+mysql> SELECT * FROM Events;
++----------+----------------+-----------+------------+-------------+-----------+
+| event_id | title          | city      | start_date | organizer   | status    |
++----------+----------------+-----------+------------+-------------+-----------+
+|        1 | Music Festival | Hyderabad | 2025-08-15 | ABC Events  | upcoming  |
+|        2 | Food Festival  | Delhi     | 2025-07-20 | XYZ Events  | completed |
+|        3 | Sports Day     | Mumbai    | 2025-09-01 | Sports Club | upcoming  |
++----------+----------------+-----------+------------+-------------+-----------+
+3 rows in set (0.009 sec)
+
+mysql> INSERT INTO Registrations
+    -> (user_id,event_id,registration_date)
+    -> VALUES
+    -> (1,1,'2025-07-01'),
+    -> (2,2,'2025-07-02'),
+    -> (3,3,'2025-07-03');
+Query OK, 3 rows affected (0.322 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM Registrations;
++-----------------+---------+----------+-------------------+
+| registration_id | user_id | event_id | registration_date |
++-----------------+---------+----------+-------------------+
+|               1 |       1 |        1 | 2025-07-01        |
+|               2 |       2 |        2 | 2025-07-02        |
+|               3 |       3 |        3 | 2025-07-03        |
++-----------------+---------+----------+-------------------+
+3 rows in set (0.006 sec)
+
+mysql> SELECT * FROM Users;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | New York    | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       5 | Bob Smith     | bob@example.com     | Los Angeles | 2024-12-05        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.005 sec)
+
+mysql> SELECT * FROM Events;
++----------+----------------+-----------+------------+-------------+-----------+
+| event_id | title          | city      | start_date | organizer   | status    |
++----------+----------------+-----------+------------+-------------+-----------+
+|        1 | Music Festival | Hyderabad | 2025-08-15 | ABC Events  | upcoming  |
+|        2 | Food Festival  | Delhi     | 2025-07-20 | XYZ Events  | completed |
+|        3 | Sports Day     | Mumbai    | 2025-09-01 | Sports Club | upcoming  |
++----------+----------------+-----------+------------+-------------+-----------+
+3 rows in set (0.010 sec)
+
+mysql> SELECT * FROM Users
+    -> WHERE city='New York';
++---------+---------------+-------------------+----------+-------------------+
+| user_id | full_name     | email             | city     | registration_date |
++---------+---------------+-------------------+----------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | New York | 2025-01-01        |
+|       4 | Alice Johnson | alice@example.com | New York | 2024-12-01        |
+|       7 | Diana King    | diana@example.com | New York | 2025-01-15        |
++---------+---------------+-------------------+----------+-------------------+
+3 rows in set (0.011 sec)
+
+mysql> SELECT * FROM Events
+    -> WHERE status='upcoming';
++----------+----------------+-----------+------------+-------------+----------+
+| event_id | title          | city      | start_date | organizer   | status   |
++----------+----------------+-----------+------------+-------------+----------+
+|        1 | Music Festival | Hyderabad | 2025-08-15 | ABC Events  | upcoming |
+|        3 | Sports Day     | Mumbai    | 2025-09-01 | Sports Club | upcoming |
++----------+----------------+-----------+------------+-------------+----------+
+2 rows in set (0.007 sec)
+
+mysql> SELECT * FROM Users
+    -> ORDER BY full_name;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | New York    | 2025-01-01        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       5 | Bob Smith     | bob@example.com     | Los Angeles | 2024-12-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.019 sec)
+
+mysql> SELECT * FROM Users
+    -> ORDER BY full_name DESC;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       5 | Bob Smith     | bob@example.com     | Los Angeles | 2024-12-05        |
+|       1 | Alice Johnson | alice@gmail.com     | New York    | 2025-01-01        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.009 sec)
+
+mysql> SELECT COUNT(*) AS TotalUsers
+    -> FROM Users;
++------------+
+| TotalUsers |
++------------+
+|          8 |
++------------+
+1 row in set (0.141 sec)
+
+mysql> SELECT MAX(registration_date)
+    -> AS LatestRegistration
+    -> FROM Users;
++--------------------+
+| LatestRegistration |
++--------------------+
+| 2025-02-01         |
++--------------------+
+1 row in set (0.058 sec)
+
+mysql> SELECT MIN(registration_date)
+    -> AS FirstRegistration
+    -> FROM Users;
++-------------------+
+| FirstRegistration |
++-------------------+
+| 2024-12-01        |
++-------------------+
+1 row in set (0.010 sec)
+
+mysql> SELECT city,
+    -> COUNT(*) AS TotalUsers
+    -> FROM Users
+    -> GROUP BY city;
++-------------+------------+
+| city        | TotalUsers |
++-------------+------------+
+| New York    |          3 |
+| Chicago     |          2 |
+| Dallas      |          1 |
+| Los Angeles |          2 |
++-------------+------------+
+4 rows in set (0.273 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> WHERE full_name LIKE 'A%';
++---------+---------------+-------------------+----------+-------------------+
+| user_id | full_name     | email             | city     | registration_date |
++---------+---------------+-------------------+----------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | New York | 2025-01-01        |
+|       4 | Alice Johnson | alice@example.com | New York | 2024-12-01        |
++---------+---------------+-------------------+----------+-------------------+
+2 rows in set (0.253 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> WHERE full_name LIKE '%n';
++---------+---------------+-------------------+----------+-------------------+
+| user_id | full_name     | email             | city     | registration_date |
++---------+---------------+-------------------+----------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | New York | 2025-01-01        |
+|       4 | Alice Johnson | alice@example.com | New York | 2024-12-01        |
++---------+---------------+-------------------+----------+-------------------+
+2 rows in set (0.006 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> WHERE user_id
+    -> BETWEEN 1 AND 3;
++---------+---------------+-------------------+----------+-------------------+
+| user_id | full_name     | email             | city     | registration_date |
++---------+---------------+-------------------+----------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | New York | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com     | Chicago  | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com | Dallas   | 2025-01-10        |
++---------+---------------+-------------------+----------+-------------------+
+3 rows in set (0.019 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> WHERE city IN
+    -> ('New York','Chicago');
++---------+---------------+---------------------+----------+-------------------+
+| user_id | full_name     | email               | city     | registration_date |
++---------+---------------+---------------------+----------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | New York | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago  | 2025-01-05        |
+|       4 | Alice Johnson | alice@example.com   | New York | 2024-12-01        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago  | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York | 2025-01-15        |
++---------+---------------+---------------------+----------+-------------------+
+5 rows in set (0.011 sec)
+
+mysql> SELECT
+    -> u.full_name,
+    -> e.title
+    -> FROM Users u
+    -> INNER JOIN Registrations r
+    -> ON u.user_id=r.user_id
+    -> INNER JOIN Events e
+    -> ON r.event_id=e.event_id;
++---------------+----------------+
+| full_name     | title          |
++---------------+----------------+
+| Alice Johnson | Music Festival |
+| Bob Smith     | Food Festival  |
+| Charlie Lee   | Sports Day     |
++---------------+----------------+
+3 rows in set (0.010 sec)
+
+mysql> UPDATE Users
+    -> SET city='Boston'
+    -> WHERE user_id=1;
+Query OK, 1 row affected (0.175 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM Users;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | Boston      | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       5 | Bob Smith     | bob@example.com     | Los Angeles | 2024-12-05        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.007 sec)
+
+mysql> DELETE FROM Users
+    -> WHERE user_id=5;
+Query OK, 1 row affected (0.064 sec)
+
+mysql> SELECT * FROM Users;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | Boston      | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+7 rows in set (0.005 sec)
+
+mysql> CREATE VIEW UserView AS
+    ->
+    -> SELECT full_name,
+    -> email
+    ->
+    -> FROM Users;
+Query OK, 0 rows affected (0.323 sec)
+
+mysql> SELECT * FROM UserView;
++---------------+---------------------+
+| full_name     | email               |
++---------------+---------------------+
+| Alice Johnson | alice@gmail.com     |
+| Bob Smith     | bob@gmail.com       |
+| Charlie Lee   | charlie@gmail.com   |
+| Alice Johnson | alice@example.com   |
+| Charlie Lee   | charlie@example.com |
+| Diana King    | diana@example.com   |
+| Ethan Hunt    | ethan@example.com   |
++---------------+---------------------+
+7 rows in set (0.030 sec)
+
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| company            |
+| enterpriseqa       |
+| eventmanagement    |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+7 rows in set (0.027 sec)
+
+mysql> DESC Users;
++-------------------+--------------+------+-----+---------+----------------+
+| Field             | Type         | Null | Key | Default | Extra          |
++-------------------+--------------+------+-----+---------+----------------+
+| user_id           | int          | NO   | PRI | NULL    | auto_increment |
+| full_name         | varchar(100) | YES  |     | NULL    |                |
+| email             | varchar(100) | YES  |     | NULL    |                |
+| city              | varchar(50)  | YES  |     | NULL    |                |
+| registration_date | date         | YES  |     | NULL    |                |
++-------------------+--------------+------+-----+---------+----------------+
+5 rows in set (0.342 sec)
+
+mysql> SELECT
+    -> u.full_name,
+    -> e.title
+    -> FROM Users u
+    -> LEFT JOIN Registrations r
+    -> ON u.user_id = r.user_id
+    -> LEFT JOIN Events e
+    -> ON r.event_id = e.event_id;
++---------------+----------------+
+| full_name     | title          |
++---------------+----------------+
+| Alice Johnson | Music Festival |
+| Bob Smith     | Food Festival  |
+| Charlie Lee   | Sports Day     |
+| Alice Johnson | NULL           |
+| Charlie Lee   | NULL           |
+| Diana King    | NULL           |
+| Ethan Hunt    | NULL           |
++---------------+----------------+
+7 rows in set (0.010 sec)
+
+mysql> SELECT
+    -> u.full_name,
+    -> e.title
+    -> FROM Users u
+    -> RIGHT JOIN Registrations r
+    -> ON u.user_id = r.user_id
+    -> RIGHT JOIN Events e
+    -> ON r.event_id = e.event_id;
++---------------+----------------+
+| full_name     | title          |
++---------------+----------------+
+| Alice Johnson | Music Festival |
+| Bob Smith     | Food Festival  |
+| Charlie Lee   | Sports Day     |
++---------------+----------------+
+3 rows in set (0.008 sec)
+
+mysql> SELECT city,
+    -> COUNT(*) AS TotalUsers
+    -> FROM Users
+    -> GROUP BY city
+    -> HAVING COUNT(*) > 1;
++----------+------------+
+| city     | TotalUsers |
++----------+------------+
+| Chicago  |          2 |
+| New York |          2 |
++----------+------------+
+2 rows in set (0.029 sec)
+
+mysql> SELECT DISTINCT city
+    -> FROM Users;
++-------------+
+| city        |
++-------------+
+| Boston      |
+| Chicago     |
+| Dallas      |
+| New York    |
+| Los Angeles |
++-------------+
+5 rows in set (0.010 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> LIMIT 3;
++---------+---------------+-------------------+---------+-------------------+
+| user_id | full_name     | email             | city    | registration_date |
++---------+---------------+-------------------+---------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | Boston  | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com     | Chicago | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com | Dallas  | 2025-01-10        |
++---------+---------------+-------------------+---------+-------------------+
+3 rows in set (0.009 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> WHERE registration_date >
+    ->
+    -> (
+    -> SELECT AVG(registration_date)
+    -> FROM Users
+    -> );
++---------+---------------+-------------------+-------------+-------------------+
+| user_id | full_name     | email             | city        | registration_date |
++---------+---------------+-------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | Boston      | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com     | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com | Dallas      | 2025-01-10        |
+|       7 | Diana King    | diana@example.com | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com | Los Angeles | 2025-02-01        |
++---------+---------------+-------------------+-------------+-------------------+
+5 rows in set (0.289 sec)
+
+mysql> SELECT *
+    -> FROM Users u
+    -> WHERE EXISTS
+    -> (
+    -> SELECT *
+    -> FROM Registrations r
+    -> WHERE r.user_id=u.user_id
+    -> );
++---------+---------------+-------------------+---------+-------------------+
+| user_id | full_name     | email             | city    | registration_date |
++---------+---------------+-------------------+---------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com   | Boston  | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com     | Chicago | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com | Dallas  | 2025-01-10        |
++---------+---------------+-------------------+---------+-------------------+
+3 rows in set (0.239 sec)
+
+mysql> CREATE INDEX idx_city
+    -> ON Users(city);
+Query OK, 0 rows affected (0.801 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> SHOW INDEX FROM Users;
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+| Table | Non_unique | Key_name | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment | Visible | Expression |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+| users |          0 | PRIMARY  |            1 | user_id     | A         |           7 |     NULL |   NULL |      | BTREE      |         |               | YES     | NULL       |
+| users |          1 | idx_city |            1 | city        | A         |           5 |     NULL |   NULL | YES  | BTREE      |         |               | YES     | NULL       |
++-------+------------+----------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+
+2 rows in set (0.123 sec)
+
+mysql> DELIMITER //
+mysql>
+mysql> CREATE PROCEDURE ShowUsers()
+    ->
+    -> BEGIN
+    ->
+    -> SELECT * FROM Users;
+    ->
+    -> END //
+Query OK, 0 rows affected (0.432 sec)
+
+mysql>
+mysql> DELIMITER ;
+mysql> CALL ShowUsers();
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | Boston      | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
++---------+---------------+---------------------+-------------+-------------------+
+7 rows in set (0.260 sec)
+
+Query OK, 0 rows affected (0.368 sec)
+
+mysql> DELIMITER //
+mysql>
+mysql> CREATE FUNCTION UserCount()
+    ->
+    -> RETURNS INT
+    ->
+    -> DETERMINISTIC
+    ->
+    -> BEGIN
+    ->
+    -> DECLARE total INT;
+    ->
+    -> SELECT COUNT(*)
+    ->
+    -> INTO total
+    ->
+    -> FROM Users;
+    ->
+    -> RETURN total;
+    ->
+    -> END //
+Query OK, 0 rows affected (0.323 sec)
+
+mysql>
+mysql> DELIMITER ;
+mysql> SELECT UserCount();
++-------------+
+| UserCount() |
++-------------+
+|           7 |
++-------------+
+1 row in set (0.029 sec)
+
+mysql> CREATE TABLE UserLog(
+    ->
+    -> log_id INT AUTO_INCREMENT PRIMARY KEY,
+    ->
+    -> message VARCHAR(255)
+    ->
+    -> );
+Query OK, 0 rows affected (0.483 sec)
+
+mysql> DELIMITER //
+mysql>
+mysql> CREATE TRIGGER before_user_insert
+    ->
+    -> BEFORE INSERT
+    ->
+    -> ON Users
+    ->
+    -> FOR EACH ROW
+    ->
+    -> BEGIN
+    ->
+    -> INSERT INTO UserLog(message)
+    ->
+    -> VALUES('New User Added');
+    ->
+    -> END //
+Query OK, 0 rows affected (0.351 sec)
+
+mysql>
+mysql> DELIMITER ;
+mysql> INSERT INTO Users
+    -> (full_name,email,city,registration_date)
+    ->
+    -> VALUES
+    ->
+    -> ('Test User',
+    -> 'test@gmail.com',
+    -> 'Boston',
+    -> CURDATE());
+Query OK, 1 row affected (0.292 sec)
+
+mysql> SELECT * FROM UserLog;
++--------+----------------+
+| log_id | message        |
++--------+----------------+
+|      1 | New User Added |
++--------+----------------+
+1 row in set (0.007 sec)
+
+mysql> CREATE VIEW EventView AS
+    ->
+    -> SELECT
+    ->
+    -> title,
+    -> city,
+    -> status
+    ->
+    -> FROM Events;
+Query OK, 0 rows affected (0.289 sec)
+
+mysql> SELECT * FROM EventView;
++----------------+-----------+-----------+
+| title          | city      | status    |
++----------------+-----------+-----------+
+| Music Festival | Hyderabad | upcoming  |
+| Food Festival  | Delhi     | completed |
+| Sports Day     | Mumbai    | upcoming  |
++----------------+-----------+-----------+
+3 rows in set (0.015 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> INTO OUTFILE
+    -> 'C:/Users/Public/users.csv'
+    -> FIELDS TERMINATED BY ','
+    -> LINES TERMINATED BY '\n';
+ERROR 1290 (HY000): The MySQL server is running with the --secure-file-priv option so it cannot execute this statement
+mysql> SELECT COUNT(*) FROM Users;
++----------+
+| COUNT(*) |
++----------+
+|        8 |
++----------+
+1 row in set (0.008 sec)
+
+mysql> SELECT COUNT(*) FROM Events;
++----------+
+| COUNT(*) |
++----------+
+|        3 |
++----------+
+1 row in set (0.034 sec)
+
+mysql> SELECT *
+    -> FROM Events
+    -> ORDER BY start_date DESC
+    -> LIMIT 1;
++----------+------------+--------+------------+-------------+----------+
+| event_id | title      | city   | start_date | organizer   | status   |
++----------+------------+--------+------------+-------------+----------+
+|        3 | Sports Day | Mumbai | 2025-09-01 | Sports Club | upcoming |
++----------+------------+--------+------------+-------------+----------+
+1 row in set (0.010 sec)
+
+mysql> ^C
+mysql> SELECT
+    -> u.full_name,
+    -> e.title
+    ->
+    -> FROM Users u
+    ->
+    -> JOIN Registrations r
+    -> ON u.user_id=r.user_id
+    ->
+    -> JOIN Events e
+    -> ON e.event_id=r.event_id;
++---------------+----------------+
+| full_name     | title          |
++---------------+----------------+
+| Alice Johnson | Music Festival |
+| Bob Smith     | Food Festival  |
+| Charlie Lee   | Sports Day     |
++---------------+----------------+
+3 rows in set (0.031 sec)
+
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| company            |
+| enterpriseqa       |
+| eventmanagement    |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+7 rows in set (0.021 sec)
+
+mysql>
+mysql> USE EventManagement;
+Database changed
+mysql>
+mysql> SHOW TABLES;
++---------------------------+
+| Tables_in_eventmanagement |
++---------------------------+
+| events                    |
+| eventview                 |
+| feedback                  |
+| registrations             |
+| resources                 |
+| sessions                  |
+| userlog                   |
+| users                     |
+| userview                  |
++---------------------------+
+9 rows in set (0.014 sec)
+
+mysql>
+mysql> SELECT * FROM Users;
++---------+---------------+---------------------+-------------+-------------------+
+| user_id | full_name     | email               | city        | registration_date |
++---------+---------------+---------------------+-------------+-------------------+
+|       1 | Alice Johnson | alice@gmail.com     | Boston      | 2025-01-01        |
+|       2 | Bob Smith     | bob@gmail.com       | Chicago     | 2025-01-05        |
+|       3 | Charlie Lee   | charlie@gmail.com   | Dallas      | 2025-01-10        |
+|       4 | Alice Johnson | alice@example.com   | New York    | 2024-12-01        |
+|       6 | Charlie Lee   | charlie@example.com | Chicago     | 2024-12-10        |
+|       7 | Diana King    | diana@example.com   | New York    | 2025-01-15        |
+|       8 | Ethan Hunt    | ethan@example.com   | Los Angeles | 2025-02-01        |
+|       9 | Test User     | test@gmail.com      | Boston      | 2026-06-02        |
++---------+---------------+---------------------+-------------+-------------------+
+8 rows in set (0.003 sec)
+
+mysql>
+mysql> SELECT * FROM Events;
++----------+----------------+-----------+------------+-------------+-----------+
+| event_id | title          | city      | start_date | organizer   | status    |
++----------+----------------+-----------+------------+-------------+-----------+
+|        1 | Music Festival | Hyderabad | 2025-08-15 | ABC Events  | upcoming  |
+|        2 | Food Festival  | Delhi     | 2025-07-20 | XYZ Events  | completed |
+|        3 | Sports Day     | Mumbai    | 2025-09-01 | Sports Club | upcoming  |
++----------+----------------+-----------+------------+-------------+-----------+
+3 rows in set (0.003 sec)
+
+mysql>
+mysql> SELECT * FROM Registrations;
++-----------------+---------+----------+-------------------+
+| registration_id | user_id | event_id | registration_date |
++-----------------+---------+----------+-------------------+
+|               1 |       1 |        1 | 2025-07-01        |
+|               2 |       2 |        2 | 2025-07-02        |
+|               3 |       3 |        3 | 2025-07-03        |
++-----------------+---------+----------+-------------------+
+3 rows in set (0.003 sec)
+
+mysql>
+mysql> SELECT * FROM Feedback;
+Empty set (0.009 sec)
+
+mysql>
+mysql> SELECT * FROM Sessions;
+Empty set (0.008 sec)
+
+mysql>
+mysql> SELECT * FROM Resources;
+Empty set (0.030 sec)
+
+mysql> SELECT
+    -> e.title,
+    -> COUNT(r.registration_id) AS TotalRegistrations
+    -> FROM Events e
+    -> LEFT JOIN Registrations r
+    -> ON e.event_id = r.event_id
+    -> GROUP BY e.title;
++----------------+--------------------+
+| title          | TotalRegistrations |
++----------------+--------------------+
+| Music Festival |                  1 |
+| Food Festival  |                  1 |
+| Sports Day     |                  1 |
++----------------+--------------------+
+3 rows in set (0.007 sec)
+
+mysql> SELECT
+    -> e.title,
+    -> COUNT(r.registration_id) AS TotalRegistrations
+    -> FROM Events e
+    -> JOIN Registrations r
+    -> ON e.event_id = r.event_id
+    -> GROUP BY e.title
+    -> ORDER BY TotalRegistrations DESC
+    -> LIMIT 1;
++----------------+--------------------+
+| title          | TotalRegistrations |
++----------------+--------------------+
+| Music Festival |                  1 |
++----------------+--------------------+
+1 row in set (0.007 sec)
+
+mysql> SELECT
+    -> u.full_name
+    -> FROM Users u
+    -> LEFT JOIN Registrations r
+    -> ON u.user_id = r.user_id
+    -> WHERE r.registration_id IS NULL;
++---------------+
+| full_name     |
++---------------+
+| Alice Johnson |
+| Charlie Lee   |
+| Diana King    |
+| Ethan Hunt    |
+| Test User     |
++---------------+
+5 rows in set (0.010 sec)
+
+mysql> SELECT
+    -> e.title
+    -> FROM Events e
+    -> LEFT JOIN Registrations r
+    -> ON e.event_id = r.event_id
+    -> WHERE r.registration_id IS NULL;
+Empty set (0.006 sec)
+
+mysql> INSERT INTO Feedback
+    -> (user_id,event_id,rating,comments)
+    -> VALUES
+    -> (1,1,5,'Excellent'),
+    -> (2,1,4,'Good'),
+    -> (3,2,5,'Amazing');
+Query OK, 3 rows affected (0.103 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+mysql> SELECT
+    -> event_id,
+    -> AVG(rating) AS AverageRating
+    -> FROM Feedback
+    -> GROUP BY event_id;
++----------+---------------+
+| event_id | AverageRating |
++----------+---------------+
+|        1 |        4.5000 |
+|        2 |        5.0000 |
++----------+---------------+
+2 rows in set (0.226 sec)
+
+mysql> SELECT
+    -> event_id,
+    -> AVG(rating) AS AverageRating
+    -> FROM Feedback
+    -> GROUP BY event_id
+    -> ORDER BY AverageRating DESC
+    -> LIMIT 1;
++----------+---------------+
+| event_id | AverageRating |
++----------+---------------+
+|        2 |        5.0000 |
++----------+---------------+
+1 row in set (0.008 sec)
+
+mysql> SELECT *
+    -> FROM Events
+    -> WHERE MONTH(start_date)=MONTH(CURDATE())+1;
++----------+---------------+-------+------------+------------+-----------+
+| event_id | title         | city  | start_date | organizer  | status    |
++----------+---------------+-------+------------+------------+-----------+
+|        2 | Food Festival | Delhi | 2025-07-20 | XYZ Events | completed |
++----------+---------------+-------+------------+------------+-----------+
+1 row in set (0.231 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> WHERE YEAR(registration_date)=YEAR(CURDATE());
++---------+-----------+----------------+--------+-------------------+
+| user_id | full_name | email          | city   | registration_date |
++---------+-----------+----------------+--------+-------------------+
+|       9 | Test User | test@gmail.com | Boston | 2026-06-02        |
++---------+-----------+----------------+--------+-------------------+
+1 row in set (0.007 sec)
+
+mysql> SELECT
+    -> city,
+    -> COUNT(*)
+    -> FROM Users
+    -> GROUP BY city
+    -> HAVING COUNT(*)>1;
++----------+----------+
+| city     | COUNT(*) |
++----------+----------+
+| Boston   |        2 |
+| Chicago  |        2 |
+| New York |        2 |
++----------+----------+
+3 rows in set (0.005 sec)
+
+mysql> SELECT *
+    -> FROM Users
+    -> ORDER BY registration_date DESC
+    -> LIMIT 3;
++---------+------------+-------------------+-------------+-------------------+
+| user_id | full_name  | email             | city        | registration_date |
++---------+------------+-------------------+-------------+-------------------+
+|       9 | Test User  | test@gmail.com    | Boston      | 2026-06-02        |
+|       8 | Ethan Hunt | ethan@example.com | Los Angeles | 2025-02-01        |
+|       7 | Diana King | diana@example.com | New York    | 2025-01-15        |
++---------+------------+-------------------+-------------+-------------------+
+3 rows in set (0.007 sec)
+
+mysql> SELECT
+    -> title,
+    ->
+    -> CASE
+    ->
+    -> WHEN status='upcoming'
+    -> THEN 'Registration Open'
+    ->
+    -> WHEN status='completed'
+    -> THEN 'Closed'
+    ->
+    -> ELSE 'Unknown'
+    ->
+    -> END AS EventStatus
+    ->
+    -> FROM Events;
++----------------+-------------------+
+| title          | EventStatus       |
++----------------+-------------------+
+| Music Festival | Registration Open |
+| Food Festival  | Closed            |
+| Sports Day     | Registration Open |
++----------------+-------------------+
+3 rows in set (0.008 sec)
+
+mysql> SELECT
+    -> UPPER(full_name)
+    -> FROM Users;
++------------------+
+| UPPER(full_name) |
++------------------+
+| ALICE JOHNSON    |
+| BOB SMITH        |
+| CHARLIE LEE      |
+| ALICE JOHNSON    |
+| CHARLIE LEE      |
+| DIANA KING       |
+| ETHAN HUNT       |
+| TEST USER        |
++------------------+
+8 rows in set (0.251 sec)
+
+mysql> SELECT
+    -> LOWER(full_name)
+    -> FROM Users;
++------------------+
+| LOWER(full_name) |
++------------------+
+| alice johnson    |
+| bob smith        |
+| charlie lee      |
+| alice johnson    |
+| charlie lee      |
+| diana king       |
+| ethan hunt       |
+| test user        |
++------------------+
+8 rows in set (0.006 sec)
+
+mysql> SELECT
+    -> full_name,
+    -> LENGTH(full_name)
+    -> FROM Users;
++---------------+-------------------+
+| full_name     | LENGTH(full_name) |
++---------------+-------------------+
+| Alice Johnson |                13 |
+| Bob Smith     |                 9 |
+| Charlie Lee   |                11 |
+| Alice Johnson |                13 |
+| Charlie Lee   |                11 |
+| Diana King    |                10 |
+| Ethan Hunt    |                10 |
+| Test User     |                 9 |
++---------------+-------------------+
+8 rows in set (0.008 sec)
+
+mysql> SELECT CURDATE();
++------------+
+| CURDATE()  |
++------------+
+| 2026-06-02 |
++------------+
+1 row in set (0.004 sec)
+
+mysql> SELECT NOW();
++---------------------+
+| NOW()               |
++---------------------+
+| 2026-06-02 14:36:48 |
++---------------------+
+1 row in set (0.004 sec)
+
+mysql> SELECT DATE_ADD(CURDATE(),
+    -> INTERVAL 7 DAY);
++-------------------------------------+
+| DATE_ADD(CURDATE(),
+INTERVAL 7 DAY) |
++-------------------------------------+
+| 2026-06-09                          |
++-------------------------------------+
+1 row in set (0.012 sec)
+
+mysql> SHOW CREATE TABLE Users;
++-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table | Create Table                                                                                                                                                                                                                                                                                                                                                        |
++-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Users | CREATE TABLE `users` (
+  `user_id` int NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(100) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `city` varchar(50) DEFAULT NULL,
+  `registration_date` date DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `idx_city` (`city`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci |
++-------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.240 sec)
+
+mysql> SHOW CREATE TABLE Events;
++--------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table  | Create Table                                                                                                                                                                                                                                                                                                                                                             |
++--------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Events | CREATE TABLE `events` (
+  `event_id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) DEFAULT NULL,
+  `city` varchar(50) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `organizer` varchar(100) DEFAULT NULL,
+  `status` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`event_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci |
++--------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.006 sec)
+
+mysql> SELECT
+    ->
+    -> u.full_name,
+    ->
+    -> e.title,
+    ->
+    -> r.registration_date
+    ->
+    -> FROM Users u
+    ->
+    -> JOIN Registrations r
+    ->
+    -> ON u.user_id=r.user_id
+    ->
+    -> JOIN Events e
+    ->
+    -> ON e.event_id=r.event_id
+    ->
+    -> ORDER BY r.registration_date;
++---------------+----------------+-------------------+
+| full_name     | title          | registration_date |
++---------------+----------------+-------------------+
+| Alice Johnson | Music Festival | 2025-07-01        |
+| Bob Smith     | Food Festival  | 2025-07-02        |
+| Charlie Lee   | Sports Day     | 2025-07-03        |
++---------------+----------------+-------------------+
+3 rows in set (0.009 sec)
